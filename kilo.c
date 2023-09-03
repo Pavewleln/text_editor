@@ -11,16 +11,23 @@
 
 struct termios orig_termios;
 
+/*** defines ***/
+
+#define CTRL_KEY(k) ((k) & 0x1f)
+
 /*** terminal ***/
 
-void die(const char *s) {
+void die(const char *s)
+{
     perror(s);
     exit(1);
 }
+
 // возвращаем все как было
 void disableRawMode()
 {
-    if(tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios) == -1) die("tcsetattr");
+    if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios) == -1)
+        die("tcsetattr");
 }
 
 // отключаем канонический режим терминалы, выключаем отображение ввода в терминале? отключаем работу сочетаний cntrl + Z/C/S/Q/V
@@ -37,10 +44,12 @@ void enableRawMode()
     // INPCK включает проверку четности, которая, похоже, не применима к современным эмуляторам терминала.
     // ISTRIP приводит к удалению 8-го бита каждого входного байта, то есть ему присваивается значение 0. Вероятно, это уже отключено.
     // CS8 это не флаг, это битовая маска из нескольких битов, которую мы устанавливаем с помощью оператора побитового ИЛИ ( |), в отличие от всех флагов, которые мы отключаем. Он устанавливает размер символа (CS) равным 8 бит на байт. В моей системе уже так настроено.
-    if(tcgetattr(STDIN_FILENO, &orig_termios) == -1) die("tcgetattr");
+    if (tcgetattr(STDIN_FILENO, &orig_termios) == -1)
+        die("tcgetattr");
     atexit(disableRawMode);
 
     struct termios raw = orig_termios;
+
     raw.c_lflag &= ~(BRKINT | ICRNL | INPCK | ISTRIP | IXON);
     raw.c_cflag &= ~(OPOST);
     raw.c_cflag &= ~(CS8);
@@ -49,7 +58,8 @@ void enableRawMode()
     raw.c_cc[VMIN] = 0;
     raw.c_cc[VTIME] = 1;
 
-    if(tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw) == -1) die("tcsetattr");
+    if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw) == -1)
+        die("tcsetattr");
 }
 
 /*** init ***/
@@ -60,7 +70,9 @@ int main(int argc, char **argv)
     while (1)
     {
         char c;
-        if(read(STDIN_FILENO, &c, 1) == -1 && errno != EAGAIN) die("read");
+        if (read(STDIN_FILENO, &c, 1) == -1 && errno != EAGAIN)
+            die("read");
+        // Проверка на управляющие символы и вывод нажатия
         if (iscntrl(c))
         {
             printf("%d\r\n", c);
@@ -69,8 +81,8 @@ int main(int argc, char **argv)
         {
             printf("%d (%c)\r\n", c, c);
         }
-        if (c == 'q')
-            break;
+        // кнопка q это выход из программы
+        if (c == CTRL_KEY('q')) break;
     };
     return 0;
 }
