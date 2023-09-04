@@ -19,6 +19,8 @@ struct termios orig_termios;
 
 void die(const char *s)
 {
+    write(STDOUT_FILENO, "\x1b[2J", 4);
+    write(STDOUT_FILENO, "\x1b[H", 3);
     perror(s);
     exit(1);
 }
@@ -62,6 +64,58 @@ void enableRawMode()
         die("tcsetattr");
 }
 
+// обработка ошибок при вводе
+char editorReadKey()
+{
+    int nread;
+    char c;
+    while ((nread = read(STDIN_FILENO, &c, 1)) != 1)
+    {
+        if (nread == -1 && errno != EAGAIN)
+            die("read");
+    };
+
+    return c;
+}
+
+/*** output ***/
+
+void editorDrawRows()
+{
+    int y;
+    for (int y = 0; y < 24; y++)
+    {
+        write(STDOUT_FILENO, "~\r\n", 3);
+    }
+}
+
+void editorRefreshScreen()
+{
+    write(STDOUT_FILENO, "\x1b[2J", 4);
+    write(STDOUT_FILENO, "\x1b[H", 3);
+
+    editorDrawRows();
+
+    write(STDOUT_FILENO, "\x1b[H", 3);
+}
+
+/*** input ***/
+
+// обработка ввода
+void editorProcessKeypress()
+{
+    char c = editorReadKey();
+    switch (c)
+    {
+    // case CTRL_KEY('q'):  -----------------  не работает ctrl
+    case 'q':
+        write(STDOUT_FILENO, "\x1b[2J", 4);
+        write(STDOUT_FILENO, "\x1b[H", 3);
+        exit(0);
+        break;
+    }
+}
+
 /*** init ***/
 
 int main(int argc, char **argv)
@@ -69,20 +123,8 @@ int main(int argc, char **argv)
     enableRawMode();
     while (1)
     {
-        char c;
-        if (read(STDIN_FILENO, &c, 1) == -1 && errno != EAGAIN)
-            die("read");
-        // Проверка на управляющие символы и вывод нажатия
-        if (iscntrl(c))
-        {
-            printf("%d\r\n", c);
-        }
-        else
-        {
-            printf("%d (%c)\r\n", c, c);
-        }
-        // кнопка q это выход из программы
-        if (c == CTRL_KEY('q')) break;
+        editorRefreshScreen();
+        editorProcessKeypress();
     };
     return 0;
 }
