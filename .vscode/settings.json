@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
     "files.associations": {
         "terminal.h": "c",
         "data.h": "c",
@@ -7,3 +8,15 @@
         "init.h": "c"
     }
 }
+=======
+  "files.associations": {
+    "*.tcc": "c",
+    "string": "c",
+    "streambuf": "c",
+    "array": "c",
+    "string_view": "c",
+    "initializer_list": "c",
+    "utility": "c"
+  }
+}
+>>>>>>> 616d9e8ced3e1d85ca9f8837b96292d9c0abd0fe
