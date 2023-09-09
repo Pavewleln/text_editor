@@ -5,6 +5,7 @@
 #define _GNU_SOURCE
 
 #include <stdio.h>
+#include <stdarg.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <ctype.h>
@@ -12,24 +13,32 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <time.h>
 #include <termios.h>
 
 /*** data ***/
 
-typedef struct erow {
+typedef struct erow
+{
   int size;
+  int rsize;
   char *chars;
+  char *render;
 } erow;
 struct editorConfig
 {
-    int cx, cy;
-    int coloff;
-    int rowoff;
-    int screenrows;
-    int screencols;
-    int numrows;
-    erow *row;
-    struct termios orig_termios;
+  int cx, cy;
+  int rx;
+  int coloff;
+  int rowoff;
+  int screenrows;
+  int screencols;
+  int numrows;
+  erow *row;
+  char *filename;
+  char statusmsg[80];
+  time_t statusmsg_time;
+  struct termios orig_termios;
 };
 
 struct editorConfig E;
@@ -38,16 +47,17 @@ struct editorConfig E;
 
 #define KILO_VERSION "0.0.1"
 #define CTRL_KEY(k) ((k) & 0x1f)
+#define KILO_TAB_STOP 8
 
 enum editorKey
 {
-    ARROW_LEFT = 1000,
-    ARROW_RIGHT,
-    ARROW_UP,
-    ARROW_DOWN,
-    PAGE_UP,
-    PAGE_DOWN,
-    HOME_KEY,
-    END_KEY,
-    DEL_KEY,
+  ARROW_LEFT = 1000,
+  ARROW_RIGHT,
+  ARROW_UP,
+  ARROW_DOWN,
+  PAGE_UP,
+  PAGE_DOWN,
+  HOME_KEY,
+  END_KEY,
+  DEL_KEY,
 };
