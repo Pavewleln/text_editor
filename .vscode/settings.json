@@ -1,0 +1,11 @@
+{
+  "files.associations": {
+    "*.tcc": "c",
+    "string": "c",
+    "streambuf": "c",
+    "array": "c",
+    "string_view": "c",
+    "initializer_list": "c",
+    "utility": "c"
+  }
+}
