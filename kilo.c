@@ -180,8 +180,6 @@ int getWindowSize(int *rows, int *cols)
 
 /*** row operations ***/
 
-<<<<<<< HEAD
-=======
 int editorRowCxToRx(erow *row, int cx)
 {
     int rx = 0;
@@ -265,7 +263,6 @@ void editorOpen(char *filename)
 
 /*** append buffer ***/
 
->>>>>>> 616d9e8ced3e1d85ca9f8837b96292d9c0abd0fe
 void abAppend(struct abuf *ab, const char *s, int len)
 {
     char *new = realloc(ab->b, ab->len + len);
